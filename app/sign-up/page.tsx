@@ -19,7 +19,7 @@ export default function SignUp() {
 
   const router = useRouter();
 
-  async function handleSubmit(evt: SubmitEvent) {
+  async function handleSubmit(evt: SubmitEvent<HTMLFormElement>) {
     evt.preventDefault();
 
     setError('');
