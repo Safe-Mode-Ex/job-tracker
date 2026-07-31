@@ -82,6 +82,7 @@ export default function SignUp() {
                 className="border-gray-300 focus:border-primary focus:ring-primary"
                 type="email"
                 placeholder="john@example.com"
+                value={email}
                 onChange={({target}) => setEmail(target.value)}
                 required
               />
@@ -95,6 +96,7 @@ export default function SignUp() {
                 type="password"
                 placeholder="123456Ab"
                 minLength={8}
+                value={password}
                 onChange={({target}) => setPassword(target.value)}
                 required
               />

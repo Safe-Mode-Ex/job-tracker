@@ -1,12 +1,47 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
+import { signIn } from "@/lib/auth/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 
 export default function SignIn() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
+
+  async function handleSubmit(evt: SubmitEvent) {
+    evt.preventDefault();
+
+    setError('');
+    setLoading(true);
+
+    try {
+      const result = await signIn.email({
+        email,
+        password,
+      });
+
+      if (result.error) {
+        setError(result.error.message ?? 'Failed to sign in');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error: unknown) {
+      setError(`An error occured: ${error}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
       <Card className="w-full max-w-md border-gray-200 shadow-lg">
@@ -17,8 +52,14 @@ export default function SignIn() {
           </CardDescription>
         </CardHeader>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {error && (
+              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-700">Email</Label>
               <Input
@@ -26,6 +67,8 @@ export default function SignIn() {
                 className="border-gray-300 focus:border-primary focus:ring-primary"
                 type="email"
                 placeholder="john@example.com"
+                value={email}
+                onChange={({target}) => setEmail(target.value)}
                 required
               />
             </div>
@@ -38,30 +81,33 @@ export default function SignIn() {
                 type="password"
                 placeholder="123456Ab"
                 minLength={8}
+                value={password}
+                onChange={({target}) => setPassword(target.value)}
                 required
               />
             </div>
           </CardContent>
-        </form>
 
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full bg-primary hover:bg-primary/90"
-          >
-            Sign In
-          </Button>
-
-          <p className="text-center text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/sign-up"
-              className="font-medium text-primary hover:underline"
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              type="submit"
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={loading}
             >
-              Sign Up
-            </Link>
-          </p>
-        </CardFooter>
+              {loading ? 'Creating the account...' : 'Sign In'}
+            </Button>
+
+            <p className="text-center text-sm text-gray-600">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/sign-up"
+                className="font-medium text-primary hover:underline"
+              >
+                Sign Up
+              </Link>
+            </p>
+          </CardFooter>
+        </form>
       </Card>
     </div>
   );
