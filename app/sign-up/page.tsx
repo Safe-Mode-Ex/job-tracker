@@ -25,7 +25,7 @@ export default function SignUp() {
 
   const { error, loading, handleFormSubmit } = useAuthForm<SignUpPayload>(
     signUp.email,
-    ErrorMessage.SignIn,
+    ErrorMessage.SignUp,
   );
 
   return (
