@@ -4,7 +4,14 @@ import Link from "next/link";
 import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "./ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { signOut, useSession } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
@@ -12,6 +19,15 @@ import { useRouter } from "next/navigation";
 export default function Navbar() {
   const { data: session } = useSession();
   const router = useRouter();
+
+  const handleSignOutClick = async () => {
+    const { data } = await signOut();
+    if (!data) {
+      alert('Error signing out');
+      return;
+    }
+    router.push('/sign-in');
+  }
 
   return (
     <nav className="border-b border-gray-200 bg-white">
@@ -57,14 +73,7 @@ export default function Navbar() {
                       </div>
                     </DropdownMenuLabel>
 
-                    <DropdownMenuItem onClick={async () => {
-                      const { data } = await signOut();
-                      if (!data) {
-                        alert('Error signing out');
-                        return;
-                      }
-                      router.push('/sign-in');
-                    }}>
+                    <DropdownMenuItem onClick={handleSignOutClick}>
                       Log Out
                     </DropdownMenuItem>
                   </DropdownMenuGroup>

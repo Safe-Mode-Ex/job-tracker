@@ -1,46 +1,31 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { SubmitEvent, useState } from "react";
+import { useState } from "react";
 import { signIn } from "@/lib/auth/auth-client";
+import { ErrorMessage } from "@/lib/enums";
+import { SignInPayload } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuthForm } from "@/hooks/use-auth-form/use-auth-form";
 
 export default function SignIn() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
-
-  async function handleSubmit(evt: SubmitEvent<HTMLFormElement>) {
-    evt.preventDefault();
-
-    setError('');
-    setLoading(true);
-
-    try {
-      const result = await signIn.email({
-        email,
-        password,
-      });
-
-      if (result.error) {
-        setError(result.error.message ?? 'Failed to sign in');
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (error: unknown) {
-      setError(`An error occured: ${error}`);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { error, loading, handleFormSubmit } = useAuthForm<SignInPayload>(
+    (values) => signIn.email(values),
+    ErrorMessage.SignIn,
+  );
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
@@ -52,7 +37,10 @@ export default function SignIn() {
           </CardDescription>
         </CardHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form
+          className="space-y-4"
+          onSubmit={(evt) => handleFormSubmit(evt, { email, password })}
+        >
           <CardContent className="space-y-4">
             {error && (
               <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
