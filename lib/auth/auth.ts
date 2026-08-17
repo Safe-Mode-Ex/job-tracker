@@ -4,6 +4,7 @@ import { MongoClient } from "mongodb";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ApiRoute } from "../enums";
+import { initializeUserBoard } from "../init-user-board";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db();
@@ -14,6 +15,18 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (!user.id) {
+            return;
+          }
+          await initializeUserBoard(user.id);
+        },
+      },
+    },
   },
 });
 

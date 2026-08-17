@@ -35,5 +35,5 @@ export interface IColumn extends Document {
   updatedAt: Date;
 }
 
-export default mongoose.models.Board ||
+export default mongoose.models.Column ||
   mongoose.model<IColumn>('Column', ColumnSchema);
