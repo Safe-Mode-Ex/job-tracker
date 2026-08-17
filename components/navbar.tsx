@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "./ui/button";
 import {
   DropdownMenu,
@@ -13,21 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { signOut, useSession } from "@/lib/auth/auth-client";
-import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useSession } from "@/lib/auth/auth-client";
+import { UseSignOut } from "@/hooks/use-sign-out/use-sign-out";
 
 export default function Navbar() {
   const { data: session } = useSession();
-  const router = useRouter();
-
-  const handleSignOutClick = async () => {
-    const { data } = await signOut();
-    if (!data) {
-      alert('Error signing out');
-      return;
-    }
-    router.push('/sign-in');
-  }
+  const handleSignOutClick = UseSignOut();
 
   return (
     <nav className="border-b border-gray-200 bg-white">
