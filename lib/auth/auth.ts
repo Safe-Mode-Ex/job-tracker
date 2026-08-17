@@ -3,6 +3,7 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { MongoClient } from "mongodb";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ApiRoute } from "../enums";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 const db = client.db();
@@ -29,6 +30,6 @@ export async function signOut() {
   });
 
   if (success) {
-    redirect('/sign-in');
+    redirect(ApiRoute.SignIn);
   }
 }

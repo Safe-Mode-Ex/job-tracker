@@ -1,5 +1,6 @@
 export const ApiRoute = {
   Dashboard: '/dashboard',
+  SignIn: '/sign-in',
 } as const;
 
 export const ErrorMessage = {
