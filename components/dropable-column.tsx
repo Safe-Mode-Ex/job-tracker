@@ -1,5 +1,5 @@
 import { MoreVertical, Trash2 } from "lucide-react";
-import { Card, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +9,7 @@ import {
 import { Button } from "./ui/button";
 import { Column } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
+import CreateJobApplicationDialog from "./create-job-application-dialog";
 
 interface DropableColumnProps {
   column: Column;
@@ -48,6 +49,10 @@ export default function DropableColumn({ column, config, boardId }: DropableColu
           </DropdownMenu>
         </div>
       </CardHeader>
+
+      <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-100 rounded-b-lg">
+        <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
+      </CardContent>
     </Card>
   );
 }
