@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { signUp } from '@/lib/auth/auth-client';
-import { ErrorMessage } from "@/lib/enums";
+import { ApiRoute, ErrorMessage } from "@/lib/enums";
 import { SignUpPayload } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,7 +102,7 @@ export default function SignUp() {
             <p className="text-center text-sm text-gray-600">
               Already have an account?{" "}
               <Link
-                href="/sign-in"
+                href={ApiRoute.SignIn}
                 className="font-medium text-primary hover:underline"
               >
                 Sign In
