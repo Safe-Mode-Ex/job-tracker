@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { useState } from "react";
+import { ChangeEvent, SubmitEvent, useState } from "react";
 
 interface CreateJobApplicationDialogProps {
   columnId: string;
@@ -18,6 +18,32 @@ export default function CreateJobApplicationDialog({
   boardId,
 }: CreateJobApplicationDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    company: '',
+    position: '',
+    location: '',
+    notes: '',
+    salary: '',
+    jobUrl: '',
+    tags: '',
+    description: '',
+  });
+
+  const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setFormData({
+      ...formData,
+      [target.id]: target.value,
+    });
+
+  const handleSubmit = async (evt: SubmitEvent) => {
+    evt.preventDefault();
+
+    try {
+      // Add application
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -42,33 +68,62 @@ export default function CreateJobApplicationDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="company">Company *</Label>
-                <Input id="company" required />
+                <Input
+                  id="company"
+                  required
+                  value={formData.company}
+                  onChange={handleFormFieldChange}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="position">Position *</Label>
-                <Input id="position" required />
+                <Input
+                  id="position"
+                  required
+                  value={formData.position}
+                  onChange={handleFormFieldChange}
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
-                <Input id="location" />
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={handleFormFieldChange}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="salary">Salary</Label>
-                <Input id="salary" placeholder="e.g., $100k - $150k" />
+                <Input
+                  id="salary"
+                  placeholder="e.g., $100k - $150k"
+                  value={formData.salary}
+                  onChange={handleFormFieldChange}
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="jobUrl">Job URL</Label>
-              <Input id="jobUrl" placeholder="htttps://..." />
+              <Input
+                id="jobUrl"
+                placeholder="htttps://..."
+                value={formData.jobUrl}
+                onChange={handleFormFieldChange}
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma-separated)</Label>
-              <Input id="tags" placeholder="React, Tailwind, High Pay" />
+              <Input
+                id="tags"
+                placeholder="React, Tailwind, High Pay"
+                value={formData.tags}
+                onChange={handleFormFieldChange}
+              />
             </div>
 
             <div className="space-y-2">
@@ -77,12 +132,19 @@ export default function CreateJobApplicationDialog({
                 id="description"
                 rows={3}
                 placeholder="Brief description of the role"
+                value={formData.description}
+                onChange={handleFormFieldChange}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" rows={4} />
+              <Textarea
+                id="notes"
+                rows={4}
+                value={formData.notes}
+                onChange={handleFormFieldChange}
+              />
             </div>
           </div>
 
@@ -91,7 +153,9 @@ export default function CreateJobApplicationDialog({
               type="button"
               variant="outline"
               onClick={() => setIsOpen(false)}
-            >Cancel</Button>
+            >
+              Cancel
+            </Button>
             <Button type="submit">Add Application</Button>
           </DialogFooter>
         </form>
