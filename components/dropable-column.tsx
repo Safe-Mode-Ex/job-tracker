@@ -9,15 +9,25 @@ import {
 import { Button } from "./ui/button";
 import { Column } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
+import { sortByOrder } from "@/lib/utils";
 import CreateJobApplicationDialog from "./create-job-application-dialog";
+import SortableJobCard from "./sortable-job-card";
 
 interface DropableColumnProps {
   column: Column;
   config: ColumnConfig;
   boardId: string;
+  sortedColumns: Column[];
 }
 
-export default function DropableColumn({ column, config, boardId }: DropableColumnProps) {
+export default function DropableColumn({
+  column,
+  config,
+  boardId,
+  sortedColumns,
+}: DropableColumnProps) {
+  const sortedJobs = sortByOrder(column.jobApplications);
+
   return (
     <Card className="min-w-75 flex-0 shadow-md p-0">
       <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3`}>
@@ -40,7 +50,7 @@ export default function DropableColumn({ column, config, boardId }: DropableColu
               </Button>
             } />
 
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="max-w-xl w-auto">
               <DropdownMenuItem className="text-destructive">
                 <Trash2 className="mr-2 h-4 w-4" />
                 Delete Column
@@ -51,6 +61,14 @@ export default function DropableColumn({ column, config, boardId }: DropableColu
       </CardHeader>
 
       <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-100 rounded-b-lg">
+        {sortedJobs.map((job) => (
+          <SortableJobCard
+            key={job._id}
+            job={{ ...job, columnId: job.columnId ?? column._id }}
+            columns={sortedColumns}
+          />
+        ))}
+
         <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
       </CardContent>
     </Card>

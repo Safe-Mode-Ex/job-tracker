@@ -14,6 +14,9 @@ export default async function Dashboard() {
     name: BOARD_NAME,
   }).populate({
     path: 'columns',
+    populate: {
+      path: 'jobApplications',
+    },
   });
 
   return (

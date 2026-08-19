@@ -4,6 +4,7 @@ import { Award, Calendar, CheckCircle2, Mic, XCircle } from "lucide-react";
 import { Board } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import DropableColumn from "./dropable-column";
+import { sortByOrder } from "@/lib/utils";
 
 interface KanbanBoardProps {
   board: Board;
@@ -34,13 +35,24 @@ const COLUMN_CONFIG: Array<ColumnConfig> = [{
 }];
 
 export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
+  const columns = board.columns;
+  const sortedColumns = sortByOrder(columns)
+
   return (
     <>
       <div>
         <div>
-          {board.columns.map((col, key) => {
+          {columns.map((col, key) => {
             const config = COLUMN_CONFIG[key] || DEFAULT_COLUMN_CONFIG;
-            return <DropableColumn key={key} column={col} config={config} boardId={board._id} />
+            return (
+              <DropableColumn
+                key={key}
+                column={col}
+                config={config}
+                boardId={board._id}
+                sortedColumns={sortedColumns}
+              />
+            );
           })}
         </div>
       </div>
