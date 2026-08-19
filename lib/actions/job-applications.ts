@@ -72,6 +72,7 @@ export async function createJobApplication(data: JobApplicationData) {
 
   const jobApplication = await JobApplication.create({
     ...data,
+    userId: session.user.id,
     tags: tags ?? [],
     status: 'applied',
     order: maxOrder ? maxOrder?.order + 1 : 0,
@@ -81,5 +82,5 @@ export async function createJobApplication(data: JobApplicationData) {
     $push: { jobApplications: jobApplication._id },
   });
 
-  return { data: jobApplication };
+  return { data: JSON.parse(JSON.stringify(jobApplication)) };
 }

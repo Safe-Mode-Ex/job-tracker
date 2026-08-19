@@ -7,27 +7,30 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { ChangeEvent, SubmitEvent, useState } from "react";
+import { createJobApplication } from "@/lib/actions/job-applications";
 
 interface CreateJobApplicationDialogProps {
   columnId: string;
   boardId: string;
 }
 
+const INITIAL_FORM_DATA = {
+  company: '',
+  position: '',
+  location: '',
+  notes: '',
+  salary: '',
+  jobUrl: '',
+  tags: '',
+  description: '',
+};
+
 export default function CreateJobApplicationDialog({
   columnId,
   boardId,
 }: CreateJobApplicationDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    company: '',
-    position: '',
-    location: '',
-    notes: '',
-    salary: '',
-    jobUrl: '',
-    tags: '',
-    description: '',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
   const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setFormData({
@@ -39,7 +42,23 @@ export default function CreateJobApplicationDialog({
     evt.preventDefault();
 
     try {
-      // Add application
+      const result = await createJobApplication({
+        ...formData,
+        columnId,
+        boardId,
+        tags: formData.tags
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean)
+      });
+
+      if (result.error) {
+        console.error('Failed to create job: ', result.error);
+        return;
+      }
+
+      setFormData(INITIAL_FORM_DATA);
+      setIsOpen(false);
     } catch (error) {
       console.error(error);
     }
@@ -63,7 +82,7 @@ export default function CreateJobApplicationDialog({
           <DialogDescription>Track a new job application</DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
