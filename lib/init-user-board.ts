@@ -1,7 +1,7 @@
+import { BOARD_NAME } from "./const";
 import connectDB from "./db";
 import { Board, Column } from './models';
 
-const BOARD_NAME = 'Job Hunt';
 const DEFAULT_COLUMNS = [
   { name: 'Wish List', order: 0 },
   { name: 'Applied', order: 1 },
