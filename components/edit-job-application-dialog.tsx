@@ -1,89 +1,84 @@
 "use client";
 
-import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { ChangeEvent, SubmitEvent, useState } from "react";
-import { createJobApplication } from "@/lib/actions/job-applications";
+import { Button } from "./ui/button";
+import {
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  Dialog,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { JobApplication } from "@/lib/models/models.types";
+import { updateJobApplication } from "@/lib/actions/job-applications";
 import { ErrorMessage } from "@/lib/enums";
 
-interface CreateJobApplicationDialogProps {
-  columnId: string;
-  boardId: string;
+interface EditJobApplicationProps {
+  job: JobApplication;
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
 }
 
-const INITIAL_FORM_DATA = {
-  company: '',
-  position: '',
-  location: '',
-  notes: '',
-  salary: '',
-  jobUrl: '',
-  tags: '',
-  description: '',
-};
+export default function EditJobApplicationDialog({
+  job,
+  isEditing,
+  setIsEditing,
+}: EditJobApplicationProps) {
+  const [formData, setFormData] = useState({
+    company: job.company,
+    position: job.position,
+    location: job.location ?? '',
+    notes: job.notes ?? '',
+    salary: job.salary ?? '',
+    jobUrl: job.jobUrl ?? '',
+    columnId: job.columnId ?? '',
+    tags: job.tags?.join(', ') ?? '',
+    description: job.description ?? '',
+  });
 
-export default function CreateJobApplicationDialog({
-  columnId,
-  boardId,
-}: CreateJobApplicationDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-
-  const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setFormData({
-      ...formData,
-      [target.id]: target.value,
-    });
-
-  const handleSubmit = async (evt: SubmitEvent) => {
+  async function handleUpdate(evt: SubmitEvent<HTMLFormElement>) {
     evt.preventDefault();
 
     try {
-      const result = await createJobApplication({
+      const result = await updateJobApplication(job._id, {
         ...formData,
-        columnId,
-        boardId,
         tags: formData.tags
           .split(',')
           .map((tag) => tag.trim())
-          .filter(Boolean)
+          .filter(Boolean),
       });
 
       if (result.error) {
-        console.error(`${ErrorMessage.CreateJob}: `, result.error);
         return;
       }
 
-      setFormData(INITIAL_FORM_DATA);
-      setIsOpen(false);
+      setIsEditing(false);
     } catch (error) {
-      console.error(error);
+      console.error(ErrorMessage.MoveJob, error);
     }
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={
-        <Button
-          variant="outline"
-          className="w-full mb-4 justify-start text-muted-foreground border-dashed border-2 hover:border-solid hover:bg-muted/50"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Job
-        </Button>
-      } />
+  // TODO: take off into common with creation form hook
+  const handleFormFieldChange =
+    ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setFormData({
+        ...formData,
+        [target.id]: target.value,
+    });
 
+  return (
+    <Dialog open={isEditing} onOpenChange={setIsEditing}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Add Job Application</DialogTitle>
           <DialogDescription>Track a new job application</DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleUpdate}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -172,11 +167,11 @@ export default function CreateJobApplicationDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={() => setIsEditing(false)}
             >
               Cancel
             </Button>
-            <Button type="submit">Add Application</Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

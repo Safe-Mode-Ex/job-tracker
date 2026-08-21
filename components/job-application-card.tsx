@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -5,6 +8,7 @@ import { Button } from "./ui/button";
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { ErrorMessage } from "@/lib/enums";
 import { updateJobApplication } from "@/lib/actions/job-applications";
+import EditJobApplicationDialog from "./edit-job-application-dialog";
 
 interface JobApplicationCardProps {
   job: JobApplication;
@@ -12,6 +16,8 @@ interface JobApplicationCardProps {
 }
 
 export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
   async function handleMove(newColumnId: string) {
     try {
       const result = await updateJobApplication(job._id, {
@@ -64,7 +70,7 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
                 } />
 
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
@@ -92,6 +98,8 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
           </div>
         </CardContent>
       </Card>
+
+      <EditJobApplicationDialog job={job} isEditing={isEditing} setIsEditing={setIsEditing} />
     </>
   );
 }
