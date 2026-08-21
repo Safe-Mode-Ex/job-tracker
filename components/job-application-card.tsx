@@ -1,15 +1,41 @@
-import { Column, JobApplication } from "@/lib/models/models.types";
-import { Card, CardContent } from "./ui/card";
+"use client";
+
+import { useState } from "react";
 import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { Column, JobApplication } from "@/lib/models/models.types";
+import { ErrorMessage } from "@/lib/enums";
+import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
+import EditJobApplicationDialog from "./edit-job-application-dialog";
 
 interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
 }
 
-export default function JobApplicationCard({job, columns}: JobApplicationCardProps) {
+export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  async function handleDelete() {
+    try {
+      const result = await deleteJobApplication(job._id);
+    } catch (error) {
+      console.error(ErrorMessage.DeleteJob, error);
+    }
+  }
+
+  async function handleMove(newColumnId: string) {
+    try {
+      const result = await updateJobApplication(job._id, {
+        columnId: newColumnId,
+      })
+    } catch (error) {
+      console.error(ErrorMessage.MoveJob, error);
+    }
+  }
+
   return (
     <>
       <Card className="cursot-pointer transition-shadow hover:shadow-2xl">
@@ -53,7 +79,7 @@ export default function JobApplicationCard({job, columns}: JobApplicationCardPro
                 } />
 
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
@@ -61,14 +87,20 @@ export default function JobApplicationCard({job, columns}: JobApplicationCardPro
                   {columns.length > 1 && (
                     <>
                       {columns.filter(({ _id }) => _id !== job.columnId).map(({name, _id}) => (
-                        <DropdownMenuItem key={_id}>
+                        <DropdownMenuItem
+                          key={_id}
+                          onClick={() => handleMove(_id)}
+                        >
                           Move to {name}
                         </DropdownMenuItem>
                       ))}
                     </>
                   )}
 
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => handleDelete()}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
@@ -78,6 +110,8 @@ export default function JobApplicationCard({job, columns}: JobApplicationCardPro
           </div>
         </CardContent>
       </Card>
+
+      <EditJobApplicationDialog job={job} isEditing={isEditing} setIsEditing={setIsEditing} />
     </>
   );
 }

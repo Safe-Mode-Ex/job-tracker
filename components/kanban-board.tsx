@@ -5,6 +5,7 @@ import { Board } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import DropableColumn from "./dropable-column";
 import { sortByOrder } from "@/lib/utils";
+import { useBoard } from "@/hooks/use-board/use-board";
 
 interface KanbanBoardProps {
   board: Board;
@@ -35,7 +36,7 @@ const COLUMN_CONFIG: Array<ColumnConfig> = [{
 }];
 
 export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
-  const columns = board.columns;
+  const { columns, moveJob } = useBoard(board);
   const sortedColumns = sortByOrder(columns)
 
   return (
