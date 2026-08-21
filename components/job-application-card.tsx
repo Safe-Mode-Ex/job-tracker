@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "./ui/button";
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { ErrorMessage } from "@/lib/enums";
-import { updateJobApplication } from "@/lib/actions/job-applications";
+import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
 import EditJobApplicationDialog from "./edit-job-application-dialog";
 
 interface JobApplicationCardProps {
@@ -18,6 +18,14 @@ interface JobApplicationCardProps {
 export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
 
+  async function handleDelete() {
+    try {
+      const result = await deleteJobApplication(job._id);
+    } catch (error) {
+      console.error(ErrorMessage.DeleteJob, error);
+    }
+  }
+
   async function handleMove(newColumnId: string) {
     try {
       const result = await updateJobApplication(job._id, {
@@ -27,6 +35,7 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
       console.error(ErrorMessage.MoveJob, error);
     }
   }
+
   return (
     <>
       <Card className="cursot-pointer transition-shadow hover:shadow-2xl">
@@ -88,7 +97,10 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
                     </>
                   )}
 
-                  <DropdownMenuItem className="text-destructive">
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => handleDelete()}
+                  >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
