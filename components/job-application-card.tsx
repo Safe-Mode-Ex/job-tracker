@@ -1,15 +1,26 @@
-import { Column, JobApplication } from "@/lib/models/models.types";
-import { Card, CardContent } from "./ui/card";
 import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
+import { Column, JobApplication } from "@/lib/models/models.types";
+import { ErrorMessage } from "@/lib/enums";
+import { updateJobApplication } from "@/lib/actions/job-applications";
 
 interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
 }
 
-export default function JobApplicationCard({job, columns}: JobApplicationCardProps) {
+export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
+  async function handleMove(newColumnId: string) {
+    try {
+      const result = await updateJobApplication(job._id, {
+        columnId: newColumnId,
+      })
+    } catch (error) {
+      console.error(ErrorMessage.MoveJob, error);
+    }
+  }
   return (
     <>
       <Card className="cursot-pointer transition-shadow hover:shadow-2xl">
@@ -61,7 +72,10 @@ export default function JobApplicationCard({job, columns}: JobApplicationCardPro
                   {columns.length > 1 && (
                     <>
                       {columns.filter(({ _id }) => _id !== job.columnId).map(({name, _id}) => (
-                        <DropdownMenuItem key={_id}>
+                        <DropdownMenuItem
+                          key={_id}
+                          onClick={() => handleMove(_id)}
+                        >
                           Move to {name}
                         </DropdownMenuItem>
                       ))}

@@ -7,4 +7,5 @@ export const ApiRoute = {
 export const ErrorMessage = {
   SignIn: 'Failed to sign in',
   SignUp: 'Failed to sign up',
+  MoveJob: 'Failed to move job application',
 } as const;
