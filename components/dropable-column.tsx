@@ -12,6 +12,8 @@ import { ColumnConfig } from "@/lib/types";
 import { sortByOrder } from "@/lib/utils";
 import CreateJobApplicationDialog from "./create-job-application-dialog";
 import SortableJobCard from "./sortable-job-card";
+import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 
 interface DropableColumnProps {
   column: Column;
@@ -26,6 +28,13 @@ export default function DropableColumn({
   boardId,
   sortedColumns,
 }: DropableColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: column._id,
+    data: {
+      type: 'column',
+      columnId: column._id,
+    },
+  });
   const sortedJobs = sortByOrder(column.jobApplications);
 
   return (
@@ -60,14 +69,24 @@ export default function DropableColumn({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-2 pt-4 bg-gray-50/50 min-h-100 rounded-b-lg">
-        {sortedJobs.map((job) => (
-          <SortableJobCard
-            key={job._id}
-            job={{ ...job, columnId: job.columnId ?? column._id }}
-            columns={sortedColumns}
-          />
-        ))}
+      <CardContent
+        ref={setNodeRef}
+        className={`space-y-2 pt-4 bg-gray-50/50 min-h-100 rounded-b-lg ${
+          isOver ? 'ring-2 ring-blue-500' : ''
+        }`}
+      >
+        <SortableContext
+          items={sortedJobs.map(({ _id }) => _id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {sortedJobs.map((job) => (
+            <SortableJobCard
+              key={job._id}
+              job={{ ...job, columnId: job.columnId ?? column._id }}
+              columns={sortedColumns}
+            />
+          ))}
+        </SortableContext>
 
         <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
       </CardContent>

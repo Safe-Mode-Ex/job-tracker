@@ -1,6 +1,7 @@
 "use client";
 
 import { Award, Calendar, CheckCircle2, Mic, XCircle } from "lucide-react";
+import { closestCorners, DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Board } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import DropableColumn from "./dropable-column";
@@ -39,8 +40,29 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
   const { columns, moveJob } = useBoard(board);
   const sortedColumns = sortByOrder(columns)
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  async function handleDragStart() {
+
+  }
+
+  async function handleDragEnd() {
+
+  }
+
   return (
-    <>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div>
         <div>
           {columns.map((col, key) => {
@@ -57,6 +79,6 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
           })}
         </div>
       </div>
-    </>
+    </DndContext>
   );
 }
