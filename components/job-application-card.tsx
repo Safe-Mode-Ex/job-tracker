@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { HTMLAttributes, useState } from "react";
 import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
 import { Card, CardContent } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
@@ -13,9 +13,14 @@ import EditJobApplicationDialog from "./edit-job-application-dialog";
 interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
+  dragHandleProps?: HTMLAttributes<HTMLElement>;
 }
 
-export default function JobApplicationCard({ job, columns }: JobApplicationCardProps) {
+export default function JobApplicationCard({
+  job,
+  columns,
+  dragHandleProps,
+}: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   async function handleDelete() {
@@ -38,7 +43,10 @@ export default function JobApplicationCard({ job, columns }: JobApplicationCardP
 
   return (
     <>
-      <Card className="cursot-pointer transition-shadow hover:shadow-2xl">
+      <Card
+        className="cursot-pointer transition-shadow hover:shadow-2xl"
+        {...dragHandleProps}
+      >
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
