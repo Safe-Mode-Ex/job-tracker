@@ -50,7 +50,7 @@ const COLUMN_CONFIG: Array<ColumnConfig> = [{
 export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const { columns, moveJob } = useBoard(board);
-  const sortedColumns = sortByOrder(columns)
+  const sortedColumns = sortByOrder(columns);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -178,6 +178,7 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
 
   return (
     <DndContext
+      id={board._id}
       sensors={sensors}
       collisionDetection={closestCorners}
       onDragStart={handleDragStart}

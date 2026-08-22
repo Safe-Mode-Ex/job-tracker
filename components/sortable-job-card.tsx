@@ -1,7 +1,7 @@
-import { Column, JobApplication } from "@/lib/models/models.types";
-import JobApplicationCard from "./job-application-card";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Column, JobApplication } from "@/lib/models/models.types";
+import JobApplicationCard from "./job-application-card";
 
 interface JobCardProps {
   job: JobApplication;
