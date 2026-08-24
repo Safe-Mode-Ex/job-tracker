@@ -62,7 +62,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="space-y-4">
+      <div className="flex flex-1 space-y-4">
         <div className="flex gap-4 overflow-x-auto pb-4">
           {sortedColumns.map((col) => {
             const config = COLUMN_CONFIG[col.name] || DEFAULT_COLUMN_CONFIG;

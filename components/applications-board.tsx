@@ -7,8 +7,8 @@ export default async function ApplicationsBoard() {
   const board = await getBoard(session?.user.id ?? '');
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto p-6">
+    <div className="flex-1 grid grid-rows-1">
+      <div className="container flex flex-col mx-auto p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-black">{board.name}</h1>
           <p className="text-gray-600">Track your job applications</p>
