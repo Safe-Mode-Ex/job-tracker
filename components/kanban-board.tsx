@@ -1,28 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Award, Calendar, CheckCircle2, Mic, XCircle } from "lucide-react";
-import {
-  closestCorners,
-  DndContext,
-  DragEndEvent,
-  DragOverlay,
-  DragStartEvent,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { closestCorners, DndContext, DragOverlay } from "@dnd-kit/core";
 import { Board } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
-import { sortByOrder } from "@/lib/utils";
-import { resolveDropTarget } from "@/lib/board-dnd";
-import { useBoard } from "@/hooks/use-board/use-board";
 import DropableColumn from "./dropable-column";
 import JobApplicationCard from "./job-application-card";
+import useBoardDnd from "@/hooks/use-board-dnd/use-board-dnd";
 
 interface KanbanBoardProps {
   board: Board;
-  userId: string;
 }
 
 const COLUMN_ICON_CLASSNAME = 'h-4 w-4';
@@ -54,40 +41,14 @@ const COLUMN_CONFIG: Record<string, ColumnConfig> = {
   },
 };
 
-export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const { columns, moveJob } = useBoard(board);
-  const sortedColumns = sortByOrder(columns);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  );
-
-  async function handleDragStart(evt: DragStartEvent) {
-    setActiveId(evt.active.id.toString());
-  }
-
-  async function handleDragEnd(evt: DragEndEvent) {
-    const { active, over } = evt;
-
-    setActiveId(null);
-
-    if (!over || !board._id) {
-      return;
-    }
-
-    const target = resolveDropTarget(active, over, sortedColumns);
-
-    if (!target) {
-      return;
-    }
-
-    await moveJob(active.id.toString(), target.targetColumnId, target.newOrder);
-  }
+export default function KanbanBoard({ board }: KanbanBoardProps) {
+  const {
+    activeId,
+    sortedColumns,
+    sensors,
+    handleDragStart,
+    handleDragEnd,
+  } = useBoardDnd(board);
 
   const activeJob = sortedColumns
     .flatMap(({ jobApplications }) => jobApplications ?? [])

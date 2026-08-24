@@ -25,7 +25,7 @@ export default function JobApplicationCard({
 
   async function handleDelete() {
     try {
-      const result = await deleteJobApplication(job._id);
+      await deleteJobApplication(job._id);
     } catch (error) {
       console.error(ErrorMessage.DeleteJob, error);
     }
@@ -33,7 +33,7 @@ export default function JobApplicationCard({
 
   async function handleMove(newColumnId: string) {
     try {
-      const result = await updateJobApplication(job._id, {
+      await updateJobApplication(job._id, {
         columnId: newColumnId,
       })
     } catch (error) {
