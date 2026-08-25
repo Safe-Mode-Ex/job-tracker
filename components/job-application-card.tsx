@@ -8,7 +8,7 @@ import { Button } from "./ui/button";
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { ErrorMessage } from "@/lib/enums";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
-import EditJobApplicationDialog from "./edit-job-application-dialog";
+import JobApplicationDialog from "./job-application-dialog";
 
 interface JobApplicationCardProps {
   job: JobApplication;
@@ -119,7 +119,12 @@ export default function JobApplicationCard({
         </CardContent>
       </Card>
 
-      <EditJobApplicationDialog job={job} isEditing={isEditing} setIsEditing={setIsEditing} />
+      <JobApplicationDialog
+        mode="edit"
+        job={job}
+        open={isEditing}
+        onOpenChange={setIsEditing}
+      />
     </>
   );
 }

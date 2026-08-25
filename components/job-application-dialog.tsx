@@ -1,84 +1,56 @@
 "use client";
 
-import { ChangeEvent, SubmitEvent, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import {
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
   Dialog,
-  DialogTitle,
+  DialogContent,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "./ui/dialog";
-import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { JobApplication } from "@/lib/models/models.types";
-import { updateJobApplication } from "@/lib/actions/job-applications";
-import { ErrorMessage } from "@/lib/enums";
+import { JobApplicationDialogProps } from "@/lib/types";
+import { DialogMode } from "@/lib/enums";
+import useJobForm from "@/hooks/use-job-form/use-job-form";
 
-interface EditJobApplicationProps {
-  job: JobApplication;
-  isEditing: boolean;
-  setIsEditing: (isEditing: boolean) => void;
-}
+export default function JobApplicationDialog(props: JobApplicationDialogProps) {
+  const { mode, columnId = '', boardId = '' } = props;
+  const [isOpen, setIsOpen] = useState(false);
+  const open = props.open ?? isOpen;
+  const setOpen = props.onOpenChange ?? setIsOpen;
 
-export default function EditJobApplicationDialog({
-  job,
-  isEditing,
-  setIsEditing,
-}: EditJobApplicationProps) {
-  const [formData, setFormData] = useState({
-    company: job.company,
-    position: job.position,
-    location: job.location ?? '',
-    notes: job.notes ?? '',
-    salary: job.salary ?? '',
-    jobUrl: job.jobUrl ?? '',
-    columnId: job.columnId ?? '',
-    tags: job.tags?.join(', ') ?? '',
-    description: job.description ?? '',
+  const [formData, handleFormFieldChange, handleSubmit] = useJobForm({
+    mode,
+    columnId,
+    boardId,
+    setOpen,
+    job: mode === DialogMode.Edit ? props.job : undefined,
   });
 
-  async function handleUpdate(evt: SubmitEvent<HTMLFormElement>) {
-    evt.preventDefault();
-
-    try {
-      const result = await updateJobApplication(job._id, {
-        ...formData,
-        tags: formData.tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-      });
-
-      if (result.error) {
-        return;
-      }
-
-      setIsEditing(false);
-    } catch (error) {
-      console.error(ErrorMessage.MoveJob, error);
-    }
-  }
-
-  // TODO: take off into common with creation form hook
-  const handleFormFieldChange =
-    ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setFormData({
-        ...formData,
-        [target.id]: target.value,
-    });
-
   return (
-    <Dialog open={isEditing} onOpenChange={setIsEditing}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {mode === 'create' && props.trigger && (
+        <DialogTrigger render={props.trigger} />
+      )}
+
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add Job Application</DialogTitle>
-          <DialogDescription>Track a new job application</DialogDescription>
+          <DialogTitle>
+            {mode === 'edit' ? 'Edit Job Application' : 'Add Job Application'}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === 'edit'
+              ? 'Update the details of your job application'
+              : 'Track a new job application'}
+          </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={handleUpdate}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -167,11 +139,13 @@ export default function EditJobApplicationDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsEditing(false)}
+              onClick={() => setOpen(false)}
             >
               Cancel
             </Button>
-            <Button type="submit">Save Changes</Button>
+            <Button type="submit">
+              {mode === 'edit' ? 'Save Changes' : 'Add Application'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
