@@ -1,4 +1,4 @@
-import { MoreVertical, Trash2 } from "lucide-react";
+import { MoreVertical, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import { Button } from "./ui/button";
 import { Column } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import { sortByOrder } from "@/lib/utils";
-import CreateJobApplicationDialog from "./create-job-application-dialog";
+import JobApplicationDialog from "./job-application-dialog";
 import SortableJobCard from "./sortable-job-card";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -88,7 +88,20 @@ export default function DropableColumn({
           ))}
         </SortableContext>
 
-        <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
+        <JobApplicationDialog
+          mode="create"
+          columnId={column._id}
+          boardId={boardId}
+          trigger={
+            <Button
+              variant="outline"
+              className="w-full mb-4 justify-start text-muted-foreground border-dashed border-2 hover:border-solid hover:bg-muted/50"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Job
+            </Button>
+          }
+        />
       </CardContent>
     </Card>
   );

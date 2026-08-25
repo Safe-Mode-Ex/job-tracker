@@ -1,21 +1,27 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { ChangeEvent, ReactElement, SubmitEvent, useState } from "react";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { ChangeEvent, SubmitEvent, useState } from "react";
-import { createJobApplication } from "@/lib/actions/job-applications";
+import { JobApplication } from "@/lib/models/models.types";
+import { createJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
 import { ErrorMessage } from "@/lib/enums";
 
-interface CreateJobApplicationDialogProps {
-  columnId: string;
-  boardId: string;
-}
+type FormData = {
+  company: string;
+  position: string;
+  location: string;
+  notes: string;
+  salary: string;
+  jobUrl: string;
+  tags: string;
+  description: string;
+};
 
-const INITIAL_FORM_DATA = {
+const INITIAL_FORM_DATA: FormData = {
   company: '',
   position: '',
   location: '',
@@ -26,12 +32,52 @@ const INITIAL_FORM_DATA = {
   description: '',
 };
 
-export default function CreateJobApplicationDialog({
-  columnId,
-  boardId,
-}: CreateJobApplicationDialogProps) {
+const parseTags = (tags: string) =>
+  tags
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+
+type JobApplicationDialogProps =
+  | {
+      mode: 'create';
+      columnId: string;
+      boardId: string;
+      trigger?: ReactElement;
+      open?: boolean;
+      onOpenChange?: (open: boolean) => void;
+    }
+  | {
+      mode: 'edit';
+      job: JobApplication;
+      open: boolean;
+      onOpenChange: (open: boolean) => void;
+      trigger?: never;
+      columnId?: never;
+      boardId?: never;
+    };
+
+export default function JobApplicationDialog(props: JobApplicationDialogProps) {
+  const { mode } = props;
+
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const open = props.open ?? isOpen;
+  const setOpen = props.onOpenChange ?? setIsOpen;
+
+  const [formData, setFormData] = useState<FormData>(
+    mode === 'edit'
+      ? {
+          company: props.job.company,
+          position: props.job.position,
+          location: props.job.location ?? '',
+          notes: props.job.notes ?? '',
+          salary: props.job.salary ?? '',
+          jobUrl: props.job.jobUrl ?? '',
+          tags: props.job.tags?.join(', ') ?? '',
+          description: props.job.description ?? '',
+        }
+      : INITIAL_FORM_DATA,
+  );
 
   const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setFormData({
@@ -43,44 +89,56 @@ export default function CreateJobApplicationDialog({
     evt.preventDefault();
 
     try {
-      const result = await createJobApplication({
-        ...formData,
-        columnId,
-        boardId,
-        tags: formData.tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean)
-      });
+      const tags = parseTags(formData.tags);
+
+      const result =
+        mode === 'create'
+          ? await createJobApplication({
+              ...formData,
+              columnId: props.columnId,
+              boardId: props.boardId,
+              tags,
+            })
+          : await updateJobApplication(props.job._id, {
+              ...formData,
+              columnId: props.job.columnId,
+              tags,
+            });
 
       if (result.error) {
-        console.error(`${ErrorMessage.CreateJob}: `, result.error);
+        console.error(
+          mode === 'create' ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
+          result.error,
+        );
         return;
       }
 
       setFormData(INITIAL_FORM_DATA);
-      setIsOpen(false);
+      setOpen(false);
     } catch (error) {
-      console.error(error);
+      console.error(
+        mode === 'create' ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
+        error,
+      );
     }
-  }
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger render={
-        <Button
-          variant="outline"
-          className="w-full mb-4 justify-start text-muted-foreground border-dashed border-2 hover:border-solid hover:bg-muted/50"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Job
-        </Button>
-      } />
+    <Dialog open={open} onOpenChange={setOpen}>
+      {mode === 'create' && props.trigger && (
+        <DialogTrigger render={props.trigger} />
+      )}
 
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Add Job Application</DialogTitle>
-          <DialogDescription>Track a new job application</DialogDescription>
+          <DialogTitle>
+            {mode === 'edit' ? 'Edit Job Application' : 'Add Job Application'}
+          </DialogTitle>
+          <DialogDescription>
+            {mode === 'edit'
+              ? 'Update the details of your job application'
+              : 'Track a new job application'}
+          </DialogDescription>
         </DialogHeader>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -172,11 +230,13 @@ export default function CreateJobApplicationDialog({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsOpen(false)}
+              onClick={() => setOpen(false)}
             >
               Cancel
             </Button>
-            <Button type="submit">Add Application</Button>
+            <Button type="submit">
+              {mode === 'edit' ? 'Save Changes' : 'Add Application'}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

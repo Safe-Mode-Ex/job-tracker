@@ -9,5 +9,6 @@ export const ErrorMessage = {
   SignUp: 'Failed to sign up',
   MoveJob: 'Failed to move job application',
   CreateJob: 'Failed to create job',
+  UpdateJob: 'Failed to update job',
   DeleteJob: 'Failed to delete job',
 } as const;
