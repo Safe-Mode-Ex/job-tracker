@@ -12,3 +12,8 @@ export const ErrorMessage = {
   UpdateJob: 'Failed to update job',
   DeleteJob: 'Failed to delete job',
 } as const;
+
+export const DialogMode = {
+  Edit: 'edit',
+  Create: 'create',
+} as const;

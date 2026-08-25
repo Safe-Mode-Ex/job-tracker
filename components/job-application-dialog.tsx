@@ -1,127 +1,36 @@
 "use client";
 
-import { ChangeEvent, ReactElement, SubmitEvent, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
-import { JobApplication } from "@/lib/models/models.types";
-import { createJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
-import { ErrorMessage } from "@/lib/enums";
-
-type FormData = {
-  company: string;
-  position: string;
-  location: string;
-  notes: string;
-  salary: string;
-  jobUrl: string;
-  tags: string;
-  description: string;
-};
-
-const INITIAL_FORM_DATA: FormData = {
-  company: '',
-  position: '',
-  location: '',
-  notes: '',
-  salary: '',
-  jobUrl: '',
-  tags: '',
-  description: '',
-};
-
-const parseTags = (tags: string) =>
-  tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-
-type JobApplicationDialogProps =
-  | {
-      mode: 'create';
-      columnId: string;
-      boardId: string;
-      trigger?: ReactElement;
-      open?: boolean;
-      onOpenChange?: (open: boolean) => void;
-    }
-  | {
-      mode: 'edit';
-      job: JobApplication;
-      open: boolean;
-      onOpenChange: (open: boolean) => void;
-      trigger?: never;
-      columnId?: never;
-      boardId?: never;
-    };
+import { JobApplicationDialogProps } from "@/lib/types";
+import { DialogMode } from "@/lib/enums";
+import useJobForm from "@/hooks/use-job-form/use-job-form";
 
 export default function JobApplicationDialog(props: JobApplicationDialogProps) {
-  const { mode } = props;
-
+  const { mode, columnId = '', boardId = '' } = props;
   const [isOpen, setIsOpen] = useState(false);
   const open = props.open ?? isOpen;
   const setOpen = props.onOpenChange ?? setIsOpen;
 
-  const [formData, setFormData] = useState<FormData>(
-    mode === 'edit'
-      ? {
-          company: props.job.company,
-          position: props.job.position,
-          location: props.job.location ?? '',
-          notes: props.job.notes ?? '',
-          salary: props.job.salary ?? '',
-          jobUrl: props.job.jobUrl ?? '',
-          tags: props.job.tags?.join(', ') ?? '',
-          description: props.job.description ?? '',
-        }
-      : INITIAL_FORM_DATA,
-  );
-
-  const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setFormData({
-      ...formData,
-      [target.id]: target.value,
-    });
-
-  const handleSubmit = async (evt: SubmitEvent) => {
-    evt.preventDefault();
-
-    try {
-      const tags = parseTags(formData.tags);
-
-      const result =
-        mode === 'create'
-          ? await createJobApplication({
-              ...formData,
-              columnId: props.columnId,
-              boardId: props.boardId,
-              tags,
-            })
-          : await updateJobApplication(props.job._id, {
-              ...formData,
-              columnId: props.job.columnId,
-              tags,
-            });
-
-      if (result.error) {
-        console.error(
-          mode === 'create' ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
-          result.error,
-        );
-        return;
-      }
-
-      setFormData(INITIAL_FORM_DATA);
-      setOpen(false);
-    } catch (error) {
-      console.error(
-        mode === 'create' ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
-        error,
-      );
-    }
-  };
+  const [formData, handleFormFieldChange, handleSubmit] = useJobForm({
+    mode,
+    columnId,
+    boardId,
+    setOpen,
+    job: mode === DialogMode.Edit ? props.job : undefined,
+  });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
