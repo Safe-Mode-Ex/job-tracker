@@ -34,17 +34,17 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {mode === 'create' && props.trigger && (
+      {mode === DialogMode.Create && props.trigger && (
         <DialogTrigger render={props.trigger} />
       )}
 
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'edit' ? 'Edit Job Application' : 'Add Job Application'}
+            {mode === DialogMode.Edit ? 'Edit Job Application' : 'Add Job Application'}
           </DialogTitle>
           <DialogDescription>
-            {mode === 'edit'
+            {mode === DialogMode.Edit
               ? 'Update the details of your job application'
               : 'Track a new job application'}
           </DialogDescription>
@@ -152,7 +152,7 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
               Cancel
             </Button>
             <Button type="submit">
-              {mode === 'edit' ? 'Save Changes' : 'Add Application'}
+              {mode === DialogMode.Edit ? 'Save Changes' : 'Add Application'}
             </Button>
           </DialogFooter>
         </form>
