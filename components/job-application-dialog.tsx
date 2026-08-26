@@ -24,7 +24,7 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
   const open = props.open ?? isOpen;
   const setOpen = props.onOpenChange ?? setIsOpen;
 
-  const [formData, handleFormFieldChange, handleSubmit] = useJobForm({
+  const { register, handleSubmit, formState } = useJobForm({
     mode,
     columnId,
     boardId,
@@ -57,19 +57,27 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
                 <Label htmlFor="company">Company *</Label>
                 <Input
                   id="company"
-                  required
-                  value={formData.company}
-                  onChange={handleFormFieldChange}
+                  aria-invalid={!!formState.errors.company}
+                  {...register("company")}
                 />
+                {formState.errors.company && (
+                  <p className="text-sm text-destructive">
+                    {formState.errors.company.message}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="position">Position *</Label>
                 <Input
                   id="position"
-                  required
-                  value={formData.position}
-                  onChange={handleFormFieldChange}
+                  aria-invalid={!!formState.errors.position}
+                  {...register("position")}
                 />
+                {formState.errors.position && (
+                  <p className="text-sm text-destructive">
+                    {formState.errors.position.message}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -78,8 +86,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
-                  value={formData.location}
-                  onChange={handleFormFieldChange}
+                  aria-invalid={!!formState.errors.location}
+                  {...register("location")}
                 />
               </div>
               <div className="space-y-2">
@@ -87,8 +95,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
                 <Input
                   id="salary"
                   placeholder="e.g., $100k - $150k"
-                  value={formData.salary}
-                  onChange={handleFormFieldChange}
+                  aria-invalid={!!formState.errors.salary}
+                  {...register("salary")}
                 />
               </div>
             </div>
@@ -97,9 +105,9 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
               <Label htmlFor="jobUrl">Job URL</Label>
               <Input
                 id="jobUrl"
-                placeholder="htttps://..."
-                value={formData.jobUrl}
-                onChange={handleFormFieldChange}
+                placeholder="https://..."
+                aria-invalid={!!formState.errors.jobUrl}
+                {...register("jobUrl")}
               />
             </div>
 
@@ -108,8 +116,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
               <Input
                 id="tags"
                 placeholder="React, Tailwind, High Pay"
-                value={formData.tags}
-                onChange={handleFormFieldChange}
+                aria-invalid={!!formState.errors.tags}
+                {...register("tags")}
               />
             </div>
 
@@ -119,8 +127,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
                 id="description"
                 rows={3}
                 placeholder="Brief description of the role"
-                value={formData.description}
-                onChange={handleFormFieldChange}
+                aria-invalid={!!formState.errors.description}
+                {...register("description")}
               />
             </div>
 
@@ -129,8 +137,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
               <Textarea
                 id="notes"
                 rows={4}
-                value={formData.notes}
-                onChange={handleFormFieldChange}
+                aria-invalid={!!formState.errors.notes}
+                {...register("notes")}
               />
             </div>
           </div>

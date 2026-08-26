@@ -1,19 +1,24 @@
-import { useState, ChangeEvent, SubmitEvent } from "react";
-import { createJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
+import { SubmitEvent } from "react";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogMode, ErrorMessage } from "@/lib/enums";
 import { JobApplication } from "@/lib/models/models.types";
 import { parseTags } from "@/lib/utils";
+import { createJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
 
-interface JobFormData {
-  company: string;
-  position: string;
-  location: string;
-  notes: string;
-  salary: string;
-  jobUrl: string;
-  tags: string;
-  description: string;
-};
+const jobFormSchema = z.object({
+  company: z.string().min(1, "Company is required"),
+  position: z.string().min(1, "Position is required"),
+  location: z.string(),
+  salary: z.string(),
+  jobUrl: z.string(),
+  tags: z.string(),
+  description: z.string(),
+  notes: z.string(),
+});
+
+type JobFormValues = z.infer<typeof jobFormSchema>;
 
 type UseJobFormProps = {
   mode: typeof DialogMode.Edit | typeof DialogMode.Create;
@@ -23,7 +28,7 @@ type UseJobFormProps = {
   setOpen: (isOpen: boolean) => void,
 }
 
-const INITIAL_FORM_DATA: JobFormData = {
+const INITIAL_FORM_DATA: JobFormValues = {
   company: '',
   position: '',
   location: '',
@@ -34,72 +39,66 @@ const INITIAL_FORM_DATA: JobFormData = {
   description: '',
 };
 
-export default function useJobForm(props: UseJobFormProps): [
-  JobFormData,
-  ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void,
-  (evt: SubmitEvent<HTMLFormElement>) => Promise<void>,
-] {
+export default function useJobForm(props: UseJobFormProps): {
+  register: ReturnType<typeof useForm<JobFormValues>>['register'];
+  handleSubmit: (evt: SubmitEvent<HTMLFormElement>) => void;
+  formState: ReturnType<typeof useForm<JobFormValues>>['formState'];
+} {
   const { mode, columnId, boardId, setOpen } = props;
   const job = mode === DialogMode.Edit ? props.job : undefined;
 
-  const [formData, setFormData] = useState<JobFormData>(
-    mode === DialogMode.Edit
-      ? {
-          company: job!.company,
-          position: job!.position,
-          location: job!.location ?? '',
-          notes: job!.notes ?? '',
-          salary: job!.salary ?? '',
-          jobUrl: job!.jobUrl ?? '',
-          tags: job!.tags?.join(', ') ?? '',
-          description: job!.description ?? '',
-        }
-      : INITIAL_FORM_DATA,
-  );
+  const form = useForm<JobFormValues>({
+    resolver: zodResolver(jobFormSchema),
+    defaultValues:
+      mode === DialogMode.Edit
+        ? {
+            company: job!.company,
+            position: job!.position,
+            location: job!.location ?? '',
+            salary: job!.salary ?? '',
+            jobUrl: job!.jobUrl ?? '',
+            tags: job!.tags?.join(', ') ?? '',
+            description: job!.description ?? '',
+            notes: job!.notes ?? '',
+          }
+        : INITIAL_FORM_DATA,
+  });
 
-  const handleFormFieldChange = ({ target }: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setFormData({
-      ...formData,
-      [target.id]: target.value,
-    });
+  const onValid: SubmitHandler<JobFormValues> = async (data) => {
+    const tags = parseTags(data.tags);
 
-  const handleSubmit = async (evt: SubmitEvent<HTMLFormElement>) => {
-    evt.preventDefault();
+    const result =
+      mode === DialogMode.Create
+        ? await createJobApplication({
+            ...data,
+            columnId,
+            boardId,
+            tags,
+          })
+        : await updateJobApplication(job!._id, {
+            ...data,
+            columnId: job!.columnId,
+            tags,
+          });
 
-    try {
-      const tags = parseTags(formData.tags);
-
-      const result =
-        mode === DialogMode.Create
-          ? await createJobApplication({
-              ...formData,
-              columnId,
-              boardId,
-              tags,
-            })
-          : await updateJobApplication(job!._id, {
-              ...formData,
-              columnId: job!.columnId,
-              tags,
-            });
-
-      if (result.error) {
-        console.error(
-          mode === DialogMode.Create ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
-          result.error,
-        );
-        return;
-      }
-
-      setFormData(INITIAL_FORM_DATA);
-      setOpen(false);
-    } catch (error) {
+    if (result.error) {
       console.error(
         mode === DialogMode.Create ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
-        error,
+        result.error,
       );
+      return;
     }
+
+    if (mode === DialogMode.Create) {
+      form.reset();
+    }
+    setOpen(false);
   };
 
-  return [formData, handleFormFieldChange, handleSubmit];
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    void form.handleSubmit(onValid)();
+  };
+
+  return { register: form.register, handleSubmit, formState: form.formState };
 }
