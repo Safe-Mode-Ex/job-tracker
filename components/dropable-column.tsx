@@ -14,7 +14,8 @@ import JobApplicationDialog from "./job-application-dialog";
 import SortableJobCard from "./sortable-job-card";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { JobApplicationData } from "@/lib/actions/job-applications";
+import { JobApplicationData, JobApplicationUpdate } from "@/lib/actions/job-applications";
+import { DialogMode } from "@/lib/enums";
 
 interface DropableColumnProps {
   column: Column;
@@ -23,7 +24,7 @@ interface DropableColumnProps {
   sortedColumns: Column[];
   deleteJob: (id: string) => void;
   createJob: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
-  updateJob: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 export default function DropableColumn({
@@ -98,7 +99,7 @@ export default function DropableColumn({
         </SortableContext>
 
         <JobApplicationDialog
-          mode="create"
+          mode={DialogMode.Create}
           columnId={column._id}
           boardId={boardId}
           createJob={createJob}

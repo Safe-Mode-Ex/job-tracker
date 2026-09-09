@@ -5,15 +5,16 @@ import {
   deleteJobApplication,
   updateJobApplication,
   JobApplicationData,
+  JobApplicationUpdate,
 } from "@/lib/actions/job-applications";
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
 import { useState } from "react";
+import { ErrorMessage } from "@/lib/enums";
 
 export function useBoard(initialBoard?: Board | null) {
   const [columns, setColumns] = useState<Column[]>(initialBoard?.columns ?? []);
   const board = initialBoard;
   const router = useRouter();
-  const error = null;
 
   async function moveJob(
     jobApplicationId: string,
@@ -73,12 +74,18 @@ export function useBoard(initialBoard?: Board | null) {
     });
 
     try {
-      await updateJobApplication(jobApplicationId, {
+      const result = await updateJobApplication(jobApplicationId, {
         columnId: newColumnId,
         order: newOrder,
       });
+      if (result.error) {
+        toast.error(result.error);
+        router.refresh();
+      }
     } catch (error) {
       console.error("Error", error);
+      toast.error(ErrorMessage.MoveJob);
+      router.refresh();
     }
   }
 
@@ -117,7 +124,7 @@ export function useBoard(initialBoard?: Board | null) {
     return { data: result.data };
   }
 
-  async function updateJob(id: string, updates: Parameters<typeof updateJobApplication>[1]) {
+  async function updateJob(id: string, updates: JobApplicationUpdate) {
     const result = await updateJobApplication(id, updates);
     if (result.error) {
       return { error: result.error };
@@ -133,5 +140,5 @@ export function useBoard(initialBoard?: Board | null) {
     return { data: result.data };
   }
 
-  return { board, columns, error, moveJob, deleteJob, createJob, updateJob };
+  return { board, columns, moveJob, deleteJob, createJob, updateJob };
 }

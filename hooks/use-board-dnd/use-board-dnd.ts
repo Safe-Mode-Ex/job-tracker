@@ -45,7 +45,11 @@ export default function useBoardDnd(
       return;
     }
 
-    await moveJob(active.id.toString(), target.targetColumnId, target.newOrder);
+    try {
+      await moveJob(active.id.toString(), target.targetColumnId, target.newOrder);
+    } catch {
+      // moveJob handles toast + rollback internally; guard against unhandled rejections.
+    }
   }
 
   return {

@@ -90,20 +90,22 @@ export async function createJobApplication(data: JobApplicationData) {
   return { data: JSON.parse(JSON.stringify(jobApplication)) };
 }
 
+export interface JobApplicationUpdate {
+  company?: string;
+  position?: string;
+  location?: string;
+  notes?: string;
+  salary?: string;
+  jobUrl?: string;
+  columnId?: string;
+  order?: number;
+  tags?: string[];
+  description?: string;
+}
+
 export async function updateJobApplication(
   id: string,
-  updates: {
-    company?: string;
-    position?: string;
-    location?: string;
-    notes?: string;
-    salary?: string;
-    jobUrl?: string;
-    columnId?: string;
-    order?: number;
-    tags?: string[];
-    description?: string;
-  },
+  updates: JobApplicationUpdate,
 ) {
   const session = await getSession();
 

@@ -30,8 +30,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
     boardId,
     setOpen,
     job: mode === DialogMode.Edit ? props.job : undefined,
-    createJob: props.mode === 'create' ? props.createJob : undefined,
-    updateJob: props.mode === 'edit' ? props.updateJob : undefined,
+    createJob: props.mode === DialogMode.Create ? props.createJob : undefined,
+    updateJob: props.mode === DialogMode.Edit ? props.updateJob : undefined,
   });
 
   return (

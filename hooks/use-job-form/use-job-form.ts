@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { DialogMode, ErrorMessage } from "@/lib/enums";
 import { JobApplication } from "@/lib/models/models.types";
 import { parseTags } from "@/lib/utils";
-import { JobApplicationData } from "@/lib/actions/job-applications";
+import { JobApplicationData, JobApplicationUpdate } from "@/lib/actions/job-applications";
 
 const jobFormSchema = z.object({
   company: z.string().min(1, "Company is required"),
@@ -28,7 +28,7 @@ type UseJobFormProps = {
   job?: JobApplication;
   setOpen: (isOpen: boolean) => void,
   createJob?: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
-  updateJob?: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob?: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 const INITIAL_FORM_DATA: JobFormValues = {

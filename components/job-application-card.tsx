@@ -6,6 +6,8 @@ import { Card, CardContent } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { Column, JobApplication } from "@/lib/models/models.types";
+import { JobApplicationUpdate } from "@/lib/actions/job-applications";
+import { DialogMode } from "@/lib/enums";
 import { useJobActions } from "@/hooks/use-job-actions/use-job-actions";
 import JobApplicationDialog from "./job-application-dialog";
 
@@ -14,7 +16,7 @@ interface JobApplicationCardProps {
   columns: Column[];
   dragHandleProps?: HTMLAttributes<HTMLElement>;
   deleteJob?: (id: string) => void;
-  updateJob?: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob?: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 export default function JobApplicationCard({
@@ -25,7 +27,7 @@ export default function JobApplicationCard({
   updateJob,
 }: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { handleDelete, handleMove, isPending } = useJobActions(deleteJob);
+  const { handleDelete, handleMove, isMoving } = useJobActions(deleteJob);
 
   return (
     <>
@@ -68,7 +70,7 @@ export default function JobApplicationCard({
             <div className="flex items-start gap-1">
               <DropdownMenu>
                 <DropdownMenuTrigger render={
-                  <Button variant="ghost" size="icon" className="h-6 w-6" disabled={isPending}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" disabled={isMoving}>
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 } />
@@ -84,7 +86,7 @@ export default function JobApplicationCard({
                       {columns.filter(({ _id }) => _id !== job.columnId).map(({name, _id}) => (
                         <DropdownMenuItem
                           key={_id}
-                          disabled={isPending}
+                          disabled={isMoving}
                           onClick={() => handleMove(job._id, _id)}
                         >
                           Move to {name}
@@ -95,7 +97,7 @@ export default function JobApplicationCard({
 
                   <DropdownMenuItem
                     className="text-destructive"
-                    disabled={isPending}
+                    disabled={isMoving}
                     onClick={() => handleDelete(job._id)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
@@ -109,7 +111,7 @@ export default function JobApplicationCard({
       </Card>
 
       <JobApplicationDialog
-        mode="edit"
+        mode={DialogMode.Edit}
         job={job}
         open={isEditing}
         onOpenChange={setIsEditing}

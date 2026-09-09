@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from "react";
 import { JobApplication } from "./models/models.types";
-import { JobApplicationData } from "./actions/job-applications";
+import { JobApplicationData, JobApplicationUpdate } from "./actions/job-applications";
 import { DialogMode } from "./enums";
 
 export type SignInPayload = { email: string, password: string };
@@ -27,7 +27,7 @@ export type JobApplicationDialogProps =
       columnId?: never;
       boardId?: never;
       createJob?: never;
-      updateJob?: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
+      updateJob?: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
     };
 
 export interface ColumnConfig {

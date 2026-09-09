@@ -1,13 +1,14 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Column, JobApplication } from "@/lib/models/models.types";
+import { JobApplicationUpdate } from "@/lib/actions/job-applications";
 import JobApplicationCard from "./job-application-card";
 
 interface JobCardProps {
   job: JobApplication;
   columns: Column[];
   deleteJob: (id: string) => void;
-  updateJob: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 export default function SortableJobCard({ job, columns, deleteJob, updateJob }: JobCardProps) {
