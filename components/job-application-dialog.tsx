@@ -30,6 +30,8 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
     boardId,
     setOpen,
     job: mode === DialogMode.Edit ? props.job : undefined,
+    createJob: props.mode === DialogMode.Create ? props.createJob : undefined,
+    updateJob: props.mode === DialogMode.Edit ? props.updateJob : undefined,
   });
 
   return (
@@ -147,12 +149,17 @@ export default function JobApplicationDialog(props: JobApplicationDialogProps) {
             <Button
               type="button"
               variant="outline"
+              disabled={formState.isSubmitting}
               onClick={() => setOpen(false)}
             >
               Cancel
             </Button>
-            <Button type="submit">
-              {mode === DialogMode.Edit ? 'Save Changes' : 'Add Application'}
+            <Button type="submit" disabled={formState.isSubmitting}>
+              {formState.isSubmitting
+                ? 'Saving...'
+                : mode === DialogMode.Edit
+                  ? 'Save Changes'
+                  : 'Add Application'}
             </Button>
           </DialogFooter>
         </form>

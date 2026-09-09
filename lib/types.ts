@@ -1,5 +1,6 @@
 import { ReactElement, ReactNode } from "react";
 import { JobApplication } from "./models/models.types";
+import { JobApplicationData, JobApplicationUpdate } from "./actions/job-applications";
 import { DialogMode } from "./enums";
 
 export type SignInPayload = { email: string, password: string };
@@ -14,6 +15,8 @@ export type JobApplicationDialogProps =
       trigger?: ReactElement;
       open?: boolean;
       onOpenChange?: (open: boolean) => void;
+      createJob?: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
+      updateJob?: never;
     }
   | {
       mode: typeof DialogMode.Edit;
@@ -23,6 +26,8 @@ export type JobApplicationDialogProps =
       trigger?: never;
       columnId?: never;
       boardId?: never;
+      createJob?: never;
+      updateJob?: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
     };
 
 export interface ColumnConfig {

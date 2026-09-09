@@ -1,11 +1,20 @@
-import { updateJobApplication } from "@/lib/actions/job-applications";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  createJobApplication,
+  deleteJobApplication,
+  updateJobApplication,
+  JobApplicationData,
+  JobApplicationUpdate,
+} from "@/lib/actions/job-applications";
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
 import { useState } from "react";
+import { ErrorMessage } from "@/lib/enums";
 
 export function useBoard(initialBoard?: Board | null) {
-  const [columns, setColumns] = useState<Column[]>(initialBoard?.columns ?? [])
+  const [columns, setColumns] = useState<Column[]>(initialBoard?.columns ?? []);
   const board = initialBoard;
-  const error = null;
+  const router = useRouter();
 
   async function moveJob(
     jobApplicationId: string,
@@ -69,10 +78,67 @@ export function useBoard(initialBoard?: Board | null) {
         columnId: newColumnId,
         order: newOrder,
       });
+      if (result.error) {
+        toast.error(result.error);
+        router.refresh();
+      }
     } catch (error) {
-      console.error('Error', error);
+      console.error("Error", error);
+      toast.error(ErrorMessage.MoveJob);
+      router.refresh();
     }
   }
 
-  return {board, columns, error, moveJob};
+  function deleteJob(jobId: string) {
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        jobApplications: col.jobApplications.filter((j) => j._id !== jobId),
+      }))
+    );
+
+    deleteJobApplication(jobId).then((res) => {
+      if (res?.error) {
+        toast.error(res.error);
+        router.refresh();
+      }
+    });
+  }
+
+  async function createJob(data: JobApplicationData) {
+    const result = await createJobApplication(data);
+    if (result.error) {
+      return { error: result.error };
+    }
+    setColumns((prev) =>
+      prev.map((col) => {
+        if (col._id === data.columnId) {
+          return {
+            ...col,
+            jobApplications: [...col.jobApplications, result.data],
+          };
+        }
+        return col;
+      })
+    );
+    return { data: result.data };
+  }
+
+  async function updateJob(id: string, updates: JobApplicationUpdate) {
+    const result = await updateJobApplication(id, updates);
+    if (result.error) {
+      return { error: result.error };
+    }
+    setColumns((prev) =>
+      prev.map((col) => ({
+        ...col,
+        jobApplications: col.jobApplications.map((j) =>
+          j._id === id ? result.data : j
+        ),
+      }))
+    );
+    return { data: result.data };
+  }
+
+  return { board, columns, moveJob, deleteJob, createJob, updateJob };
 }

@@ -8,12 +8,14 @@ import {
 } from "@dnd-kit/core";
 import { sortByOrder } from "@/lib/utils";
 import { resolveDropTarget } from "@/lib/board-dnd";
-import { Board } from "@/lib/models/models.types";
-import { useBoard } from "../use-board/use-board";
+import { Column } from "@/lib/models/models.types";
 
-export default function useBoardDnd(board: Board) {
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const { columns, moveJob } = useBoard(board);
+export default function useBoardDnd(
+  columns: Column[],
+  moveJob: (id: string, colId: string, order: number) => Promise<void>,
+  boardId: string,
+) {
+  const [activeId, setActiveId] = useState<string | null>(null);
   const sortedColumns = sortByOrder(columns);
 
   const sensors = useSensors(
@@ -33,7 +35,7 @@ export default function useBoardDnd(board: Board) {
 
     setActiveId(null);
 
-    if (!over || !board._id) {
+    if (!over || !boardId) {
       return;
     }
 
@@ -43,7 +45,11 @@ export default function useBoardDnd(board: Board) {
       return;
     }
 
-    await moveJob(active.id.toString(), target.targetColumnId, target.newOrder);
+    try {
+      await moveJob(active.id.toString(), target.targetColumnId, target.newOrder);
+    } catch {
+      // moveJob handles toast + rollback internally; guard against unhandled rejections.
+    }
   }
 
   return {

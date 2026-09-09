@@ -6,6 +6,7 @@ import { Board } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import DropableColumn from "./dropable-column";
 import JobApplicationCard from "./job-application-card";
+import { useBoard } from "@/hooks/use-board/use-board";
 import useBoardDnd from "@/hooks/use-board-dnd/use-board-dnd";
 
 interface KanbanBoardProps {
@@ -42,13 +43,15 @@ const COLUMN_CONFIG: Record<string, ColumnConfig> = {
 };
 
 export default function KanbanBoard({ board }: KanbanBoardProps) {
+  const { columns, moveJob, deleteJob, createJob, updateJob } = useBoard(board);
+
   const {
     activeId,
     sortedColumns,
     sensors,
     handleDragStart,
     handleDragEnd,
-  } = useBoardDnd(board);
+  } = useBoardDnd(columns, moveJob, board._id);
 
   const activeJob = sortedColumns
     .flatMap(({ jobApplications }) => jobApplications ?? [])
@@ -73,6 +76,10 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
                 config={config}
                 boardId={board._id}
                 sortedColumns={sortedColumns}
+                moveJob={moveJob}
+                deleteJob={deleteJob}
+                createJob={createJob}
+                updateJob={updateJob}
               />
             );
           })}

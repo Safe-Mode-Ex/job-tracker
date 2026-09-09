@@ -1,36 +1,30 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
-import {
-  deleteJobApplication,
-  updateJobApplication,
-} from "@/lib/actions/job-applications";
 
-export function useJobActions() {
-  const [isPending, startTransition] = useTransition();
+export function useJobActions(
+  deleteJob?: (id: string) => void,
+  moveJob?: (id: string, columnId: string, order: number) => Promise<void>,
+) {
+  const [isMoving, setIsMoving] = useState(false);
 
   function handleDelete(id: string) {
-    startTransition(async () => {
-      const res = await deleteJobApplication(id);
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Application deleted");
-      }
-    });
+    if (!deleteJob) return;
+    deleteJob(id);
+    toast.success("Application deleted");
   }
 
-  function handleMove(id: string, columnId: string) {
-    startTransition(async () => {
-      const res = await updateJobApplication(id, { columnId });
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Moved");
-      }
-    });
+  async function handleMove(id: string, columnId: string, order: number) {
+    if (!moveJob) return;
+    setIsMoving(true);
+    try {
+      await moveJob(id, columnId, order);
+      toast.success("Moved");
+    } finally {
+      setIsMoving(false);
+    }
   }
 
-  return { handleDelete, handleMove, isPending };
+  return { handleDelete, handleMove, isMoving };
 }

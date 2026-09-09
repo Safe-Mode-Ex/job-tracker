@@ -1,14 +1,18 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Column, JobApplication } from "@/lib/models/models.types";
+import { JobApplicationUpdate } from "@/lib/actions/job-applications";
 import JobApplicationCard from "./job-application-card";
 
 interface JobCardProps {
   job: JobApplication;
   columns: Column[];
+  moveJob: (id: string, columnId: string, order: number) => Promise<void>;
+  deleteJob: (id: string) => void;
+  updateJob: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
-export default function SortableJobCard({ job, columns }: JobCardProps) {
+export default function SortableJobCard({ job, columns, moveJob, deleteJob, updateJob }: JobCardProps) {
   const {
     attributes,
     listeners,
@@ -36,6 +40,9 @@ export default function SortableJobCard({ job, columns }: JobCardProps) {
         job={job}
         columns={columns}
         dragHandleProps={{...attributes, ...listeners}}
+        moveJob={moveJob}
+        deleteJob={deleteJob}
+        updateJob={updateJob}
       />
     </div>
   );
