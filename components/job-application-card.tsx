@@ -13,15 +13,19 @@ interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
   dragHandleProps?: HTMLAttributes<HTMLElement>;
+  deleteJob?: (id: string) => void;
+  updateJob?: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 export default function JobApplicationCard({
   job,
   columns,
   dragHandleProps,
+  deleteJob,
+  updateJob,
 }: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { handleDelete, handleMove, isPending } = useJobActions();
+  const { handleDelete, handleMove, isPending } = useJobActions(deleteJob);
 
   return (
     <>
@@ -109,6 +113,7 @@ export default function JobApplicationCard({
         job={job}
         open={isEditing}
         onOpenChange={setIsEditing}
+        updateJob={updateJob}
       />
     </>
   );

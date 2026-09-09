@@ -7,19 +7,23 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
-import { Column } from "@/lib/models/models.types";
+import { Column, JobApplication } from "@/lib/models/models.types";
 import { ColumnConfig } from "@/lib/types";
 import { sortByOrder } from "@/lib/utils";
 import JobApplicationDialog from "./job-application-dialog";
 import SortableJobCard from "./sortable-job-card";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { JobApplicationData } from "@/lib/actions/job-applications";
 
 interface DropableColumnProps {
   column: Column;
   config: ColumnConfig;
   boardId: string;
   sortedColumns: Column[];
+  deleteJob: (id: string) => void;
+  createJob: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 export default function DropableColumn({
@@ -27,6 +31,9 @@ export default function DropableColumn({
   config,
   boardId,
   sortedColumns,
+  deleteJob,
+  createJob,
+  updateJob,
 }: DropableColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: column._id,
@@ -84,6 +91,8 @@ export default function DropableColumn({
               key={job._id}
               job={{ ...job, columnId: job.columnId ?? column._id }}
               columns={sortedColumns}
+              deleteJob={deleteJob}
+              updateJob={updateJob}
             />
           ))}
         </SortableContext>
@@ -92,6 +101,7 @@ export default function DropableColumn({
           mode="create"
           columnId={column._id}
           boardId={boardId}
+          createJob={createJob}
           trigger={
             <Button
               variant="outline"

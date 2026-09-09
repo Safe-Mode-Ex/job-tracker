@@ -2,10 +2,11 @@ import { SubmitEvent } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { DialogMode, ErrorMessage } from "@/lib/enums";
 import { JobApplication } from "@/lib/models/models.types";
 import { parseTags } from "@/lib/utils";
-import { createJobApplication, updateJobApplication } from "@/lib/actions/job-applications";
+import { JobApplicationData } from "@/lib/actions/job-applications";
 
 const jobFormSchema = z.object({
   company: z.string().min(1, "Company is required"),
@@ -26,6 +27,8 @@ type UseJobFormProps = {
   boardId: string;
   job?: JobApplication;
   setOpen: (isOpen: boolean) => void,
+  createJob?: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
+  updateJob?: (id: string, updates: Record<string, unknown>) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
 const INITIAL_FORM_DATA: JobFormValues = {
@@ -44,7 +47,7 @@ export default function useJobForm(props: UseJobFormProps): {
   handleSubmit: (evt: SubmitEvent<HTMLFormElement>) => void;
   formState: ReturnType<typeof useForm<JobFormValues>>['formState'];
 } {
-  const { mode, columnId, boardId, setOpen } = props;
+  const { mode, columnId, boardId, setOpen, createJob, updateJob } = props;
   const job = mode === DialogMode.Edit ? props.job : undefined;
 
   const form = useForm<JobFormValues>({
@@ -67,25 +70,20 @@ export default function useJobForm(props: UseJobFormProps): {
   const onValid: SubmitHandler<JobFormValues> = async (data) => {
     const tags = parseTags(data.tags);
 
-    const result =
-      mode === DialogMode.Create
-        ? await createJobApplication({
-            ...data,
-            columnId,
-            boardId,
-            tags,
-          })
-        : await updateJobApplication(job!._id, {
-            ...data,
-            columnId: job!.columnId,
-            tags,
-          });
+    let result: { data?: JobApplication; error?: string };
+
+    if (mode === DialogMode.Create) {
+      result = createJob
+        ? await createJob({ ...data, columnId, boardId, tags })
+        : { error: ErrorMessage.CreateJob };
+    } else {
+      result = updateJob
+        ? await updateJob(job!._id, { ...data, columnId: job!.columnId, tags })
+        : { error: ErrorMessage.UpdateJob };
+    }
 
     if (result.error) {
-      console.error(
-        mode === DialogMode.Create ? ErrorMessage.CreateJob : ErrorMessage.UpdateJob,
-        result.error,
-      );
+      toast.error(result.error);
       return;
     }
 
