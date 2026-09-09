@@ -76,6 +76,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
                 config={config}
                 boardId={board._id}
                 sortedColumns={sortedColumns}
+                moveJob={moveJob}
                 deleteJob={deleteJob}
                 createJob={createJob}
                 updateJob={updateJob}

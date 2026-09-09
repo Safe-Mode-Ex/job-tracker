@@ -22,6 +22,7 @@ interface DropableColumnProps {
   config: ColumnConfig;
   boardId: string;
   sortedColumns: Column[];
+  moveJob: (id: string, columnId: string, order: number) => Promise<void>;
   deleteJob: (id: string) => void;
   createJob: (data: JobApplicationData) => Promise<{ data?: JobApplication; error?: string }>;
   updateJob: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
@@ -32,6 +33,7 @@ export default function DropableColumn({
   config,
   boardId,
   sortedColumns,
+  moveJob,
   deleteJob,
   createJob,
   updateJob,
@@ -92,6 +94,7 @@ export default function DropableColumn({
               key={job._id}
               job={{ ...job, columnId: job.columnId ?? column._id }}
               columns={sortedColumns}
+              moveJob={moveJob}
               deleteJob={deleteJob}
               updateJob={updateJob}
             />

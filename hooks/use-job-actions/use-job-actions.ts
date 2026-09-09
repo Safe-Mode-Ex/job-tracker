@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { updateJobApplication } from "@/lib/actions/job-applications";
 
-export function useJobActions(deleteJob?: (id: string) => void) {
+export function useJobActions(
+  deleteJob?: (id: string) => void,
+  moveJob?: (id: string, columnId: string, order: number) => Promise<void>,
+) {
   const [isMoving, setIsMoving] = useState(false);
 
   function handleDelete(id: string) {
@@ -13,15 +15,12 @@ export function useJobActions(deleteJob?: (id: string) => void) {
     toast.success("Application deleted");
   }
 
-  async function handleMove(id: string, columnId: string) {
+  async function handleMove(id: string, columnId: string, order: number) {
+    if (!moveJob) return;
     setIsMoving(true);
     try {
-      const res = await updateJobApplication(id, { columnId });
-      if (res?.error) {
-        toast.error(res.error);
-      } else {
-        toast.success("Moved");
-      }
+      await moveJob(id, columnId, order);
+      toast.success("Moved");
     } finally {
       setIsMoving(false);
     }

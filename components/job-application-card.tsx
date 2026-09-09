@@ -15,6 +15,7 @@ interface JobApplicationCardProps {
   job: JobApplication;
   columns: Column[];
   dragHandleProps?: HTMLAttributes<HTMLElement>;
+  moveJob?: (id: string, columnId: string, order: number) => Promise<void>;
   deleteJob?: (id: string) => void;
   updateJob?: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
@@ -23,11 +24,18 @@ export default function JobApplicationCard({
   job,
   columns,
   dragHandleProps,
+  moveJob,
   deleteJob,
   updateJob,
 }: JobApplicationCardProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const { handleDelete, handleMove, isMoving } = useJobActions(deleteJob);
+  const { handleDelete, handleMove, isMoving } = useJobActions(deleteJob, moveJob);
+
+  function handleMoveToColumn(columnId: string) {
+    const targetColumn = columns.find(c => c._id === columnId);
+    const order = targetColumn?.jobApplications.length ?? 0;
+    handleMove(job._id, columnId, order);
+  }
 
   return (
     <>
@@ -87,7 +95,7 @@ export default function JobApplicationCard({
                         <DropdownMenuItem
                           key={_id}
                           disabled={isMoving}
-                          onClick={() => handleMove(job._id, _id)}
+                          onClick={() => handleMoveToColumn(_id)}
                         >
                           Move to {name}
                         </DropdownMenuItem>

@@ -7,11 +7,12 @@ import JobApplicationCard from "./job-application-card";
 interface JobCardProps {
   job: JobApplication;
   columns: Column[];
+  moveJob: (id: string, columnId: string, order: number) => Promise<void>;
   deleteJob: (id: string) => void;
   updateJob: (id: string, updates: JobApplicationUpdate) => Promise<{ data?: JobApplication; error?: string }>;
 }
 
-export default function SortableJobCard({ job, columns, deleteJob, updateJob }: JobCardProps) {
+export default function SortableJobCard({ job, columns, moveJob, deleteJob, updateJob }: JobCardProps) {
   const {
     attributes,
     listeners,
@@ -39,6 +40,7 @@ export default function SortableJobCard({ job, columns, deleteJob, updateJob }: 
         job={job}
         columns={columns}
         dragHandleProps={{...attributes, ...listeners}}
+        moveJob={moveJob}
         deleteJob={deleteJob}
         updateJob={updateJob}
       />
